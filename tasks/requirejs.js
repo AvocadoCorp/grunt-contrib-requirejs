@@ -33,8 +33,21 @@ module.exports = function(grunt) {
         done();
       }
     });
-    grunt.verbose.writeflags(options, 'Options');
 
-    requirejs.optimize(options, options.done.bind(null, done));
+    grunt.verbose.writeflags(options, 'Options');
+    if (options.files) {
+      var completed = 0;
+      var complete = function() {
+        if (++completed === options.files.length) {
+          options.done.call(null, done);
+        }
+      }
+      options.files.forEach(function(file) {
+        file.logLevel = options.logLevel;
+        requirejs.optimize(file, complete);
+      });
+    } else {
+      requirejs.optimize(options, options.done.bind(null, done));
+    }
   });
 };
